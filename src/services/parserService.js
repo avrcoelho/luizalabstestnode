@@ -25,7 +25,7 @@ const separateMatches = (data) => {
    return dataMatches;
 }
 
-// verifica o inicio de cada linha para saber se começa com número
+// cria o objeto e insere as informações
 const structureObject= (data) => {
    const obj = {},
          rgxKill = /^(([0-9]{1,}:[0-9]{1,})\sKill:)/, // expressão regular para verificar se é kill
@@ -49,6 +49,17 @@ const structureObject= (data) => {
          let total_kills = 0;
          
          for (let j of i) {
+            // verifica se é player
+            if (rgxUser.test(j.trim())) {
+               // obtem o nome do play
+               player = j.match(/n\\(.*)\\t\\/)[1];
+               // verifica se jogador existe no array, se não existir adiciona
+               if (obj[`game_${pos}`].players.indexOf(player) < 0) { 
+                  obj[`game_${pos}`].players.push(player);
+                  obj[`game_${pos}`].kills[player] = 0;
+               }
+            }
+
             // verifica se é kill
             if (rgxKill.test(j.trim())) {
                // faz a soma de kills de cada partida
@@ -69,19 +80,9 @@ const structureObject= (data) => {
 
                   // verifica se atributo esta com valor maior que 0
                   if (obj[`game_${pos}`].kills[player] > 0) { 
-                     // subtrai -1
+                     // subtrai 1
                      obj[`game_${pos}`].kills[player] = obj[`game_${pos}`].kills[player] - 1;
                   }
-               }
-            }
-            // verifica se é player
-            if (rgxUser.test(j.trim())) {
-               // obtem o nome do play
-               player = j.match(/n\\(.*)\\t\\/)[1];
-               // verifica se jogador existe no array, se não existir adiciona
-               if (obj[`game_${pos}`].players.indexOf(player) < 0) { 
-                  obj[`game_${pos}`].players.push(player);
-                  obj[`game_${pos}`].kills[player] = 0;
                }
             }
          }
